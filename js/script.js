@@ -1,27 +1,46 @@
 window.addEventListener("DOMContentLoaded", () => {
-    function req() {
+    const form = document.querySelector("form");
+
+    function req(e) {
+        e.preventDefault();
+
+        let formData = new FormData(form);
+        // formData.append("id", Math.random());
+
+        // let obj = {};
+        // formData.forEach((value, key) => {
+        //     obj[key] = value;
+        // });
+        // let json = JSON.stringify(obj);
+
         // const request = new XMLHttpRequest();
-        // request.open("GET", "http://localhost:3000/people");
-        // request.setRequestHeader("Content-type", "applictaion/json; charset=utf-8");
-        // request.send();
+        // request.open("POST", "./api.php");
+        // // request.setRequestHeader("Content-type", "multipart/form-data");
+        // request.send(formData);
         // request.addEventListener("load", function() {
         //     if (request.status === 200) {
-        //         let data = JSON.parse(request.response);
+        //         // let data = JSON.parse(request.response);
         //         console.log(data);
-        //         createCards(data);
+        //         // createCards(data);
         //     } else {
         //         console.error("Что-то пошло не так");
         //     }
         // });
 
-        getResource("http://localhost:3000/people")
-            .then(data => createCards(data.data))
-            .catch(err => console.error(err));
+        // getResource("./api.php", formData)
+        //     .then(data => console.log(data))
+        //     .catch(err => console.error(err));
 
-        this.remove();
+        axios({
+                method: 'post',
+                url: './api.php',
+                data: formData,
+                // headers: { "content-type": "multipart/form-data" }
+            })
+            .then(data => console.log(data.data));
+
+        // this.remove();
     }
-
-    document.querySelector('button').addEventListener('click', req, { "once": true });
 
     // async function getResource(url) {
     //     const res = await fetch(`${url}`);
@@ -33,27 +52,35 @@ window.addEventListener("DOMContentLoaded", () => {
     //     return await res.json();
     // }
 
-    async function getResource(url) {
-        const res = await axios(`${url}`);
+    form.addEventListener("submit", (e) => req(e), { once: true });
+
+    async function getResource(url, data) {
+        const res = await axios(`${url}`, {
+            method: "POST",
+            // headers: {
+            //     "Content-type": "multipart/form-data"
+            // },
+            body: data
+        });
 
         if (res.status !== 200) {
-            throw new Error(`Could not fetch ${url}, status: ${res.status}`)
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
         }
 
-        return res;
+        return await res.text();
     }
 
     function createCards(response) {
-        response.forEach(item => {
-            let card = document.createElement('div');
+        response.forEach((item) => {
+            let card = document.createElement("div");
 
-            card.classList.add('card');
+            card.classList.add("card");
 
             let icon;
-            if (item.sex === 'male') {
+            if (item.sex === "male") {
                 icon = "icons/mars.png";
             } else {
-                icon = "icons/female.png"
+                icon = "icons/female.png";
             }
 
             card.innerHTML = `
@@ -64,7 +91,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="age">${item.age}</div>
             `;
-            document.querySelector('.app').appendChild(card);
-        })
+            document.querySelector(".app").appendChild(card);
+        });
     }
 });
